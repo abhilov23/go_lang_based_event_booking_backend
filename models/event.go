@@ -1,0 +1,25 @@
+package models
+
+import "time"
+
+type Event struct {
+	ID          uint
+	Name        string  `binding:"required"` // this binding defines that this field is required
+	Description string  `binding:"required"`
+	Location    string  `binding:"required"`
+	DateTime    time.Time `binding:"required"`
+	UserID      int 
+}
+
+// this is a global variable
+var events = []Event{}
+
+
+func (e Event) Save(){
+  // Later: add it to a database
+  events = append(events, e)
+}
+
+func GetAllEvents() []Event {
+	return events
+}
