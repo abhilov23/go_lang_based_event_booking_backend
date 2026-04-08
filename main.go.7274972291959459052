@@ -17,7 +17,7 @@ func main() {
 	server := gin.Default()
 
 	// http support different kinds of requests: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS etc.
-	server.GET("/events", getEvents)    // this will get all the events
+	server.GET("/events", getEvents) // this will get all the events
 	server.GET(`/events/:id`, getEvent) // here we are using a dynamic placeholder for the id i.e. :id for getting the ID
 	server.POST("/events", createEvent) // this will create a new event
 
@@ -30,7 +30,7 @@ func getEvents(context *gin.Context) {
 	events, err := models.GetAllEvents()
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch events, try again later"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message":"Could not fetch events, try again later"})
 		return
 	}
 	// here the JSON method is used to send the response,
@@ -50,15 +50,17 @@ func getEvent(context *gin.Context) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			context.JSON(http.StatusNotFound, gin.H{"message": "Event not found"})
+			context.JSON(http.StatusNotFound, gin.H{"message":"Event not found"})
 			return
 		}
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch event, try again later"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message":"Could not fetch event, try again later"})
 		return
 	}
 
 	context.JSON(http.StatusOK, event)
 }
+
+
 
 func createEvent(context *gin.Context) {
 	var event models.Event
@@ -76,7 +78,7 @@ func createEvent(context *gin.Context) {
 	err = event.Save()
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch events, try again later"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message":"Could not fetch events, try again later"})
 		return
 	}
 	context.JSON(http.StatusCreated, gin.H{"event created": event})
