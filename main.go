@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/abhilov23/gin_project/db"
 	"github.com/abhilov23/gin_project/models"
@@ -15,8 +16,9 @@ func main() {
 	server := gin.Default()
 
 	// http support different kinds of requests: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS etc.
-	server.GET("/events", getEvents)
-	server.POST("/events", createEvent)
+	server.GET("/events", getEvents) // this will get all the events
+	server.GET(`/events/:id`, getEvent) // here we are using a dynamic placeholder for the id i.e. :id for getting the ID
+	server.POST("/events", createEvent) // this will create a new event
 
 	server.Run(":8080") // localhost 8080
 }
@@ -34,6 +36,26 @@ func getEvents(context *gin.Context) {
 	// and gin.H is a shortcut for map[string]interface{}
 	context.JSON(http.StatusOK, events)
 }
+
+func getEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64) //converting string into int64
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid event id"})
+		return
+	}
+
+	event, err := models.GetEventByID(eventId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message":"Could not fetch event, try again later"})
+		return
+	}
+
+	context.JSON(http.StatusOK, event)
+}
+
+
 
 func createEvent(context *gin.Context) {
 	var event models.Event

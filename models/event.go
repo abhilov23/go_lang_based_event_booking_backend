@@ -19,7 +19,7 @@ type Event struct {
 var events = []Event{}
 
 
-func (e Event) Save()  error {
+func (e *Event) Save() error {
 
 	// IN this query we are using the ? placeholder to avoid sql injection
   query := `
@@ -39,7 +39,9 @@ func (e Event) Save()  error {
 	return err
    }
    id, err := result.LastInsertId()
-   e.ID = id
+   if err == nil {
+	e.ID = id
+   }
 
    return err
 }
@@ -55,7 +57,7 @@ func GetAllEvents() ([]Event, error) {
 	var events []Event 
 	for rows.Next(){
      var event Event 
-	 rows.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
+	err:= rows.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
 	
     
 	if err != nil {
@@ -64,4 +66,18 @@ func GetAllEvents() ([]Event, error) {
     events = append(events, event)
 }
 	return events, nil
+}
+
+func GetEventByID(id int64) (*Event, error) {
+   query := "SELECT * FROM events WHERE id = ?" // the value of ? will be replaced by the value of id while executing the query
+   row := db.DB.QueryRow(query, id)
+
+   var event Event 
+   err := row.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
+  
+   if err != nil {
+	return nil, err
+   }
+
+   return &event, nil
 }
