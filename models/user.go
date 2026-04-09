@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/abhilov23/gin_project/db"
 	"github.com/abhilov23/gin_project/utils"
 )
@@ -36,4 +38,24 @@ func (u User) Save() error {
 
 	u.ID = userId
 	return err
+}
+
+func (u User) ValidateCredentials() error {
+	query := "SELECT email, password FROM users WHERE email = ?"
+	row := db.DB.QueryRow(query, u.Email) // this will also execute the query but the difference is that results will not be stored in memory
+
+	
+	var retrivedPassword string
+	err := row.Scan(&retrivedPassword)
+	if err != nil {
+		return nil
+	}
+  
+    passwordIsValid := utils.CheckPasswordHash(u.Password, retrivedPassword)
+
+	if(!passwordIsValid) {
+		return errors.New("Credentials invalid")
+	}
+	
+	return nil
 }
