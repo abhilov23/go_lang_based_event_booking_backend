@@ -14,7 +14,7 @@ var DB *sql.DB
 func InitDB() {
 	var err error
 	DB, err = sql.Open("sqlite", "api.db") // here the first argument is the driver, and the second is the database
-
+ 
 	if err != nil {
 		panic(fmt.Sprintf("Could not connect to database: %v", err))
 	}
