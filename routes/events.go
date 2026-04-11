@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/abhilov23/gin_project/models"
 	"github.com/abhilov23/gin_project/utils"
@@ -47,19 +48,25 @@ func getEvent(context *gin.Context) {
 }
 
 func createEvent(context *gin.Context) {
-	token := context.Request.Header.Get("Authorization")
-	
-	if token=="" {
-		context.JSON(http.StatusUnauthorized,gin.H{"message":"unauthorized"})
+	authHeader := context.GetHeader("Authorization")
+	if authHeader == "" {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
 		return
 	}
 
-	err := utils.VerifyToken(token)
-    
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message":"Not Authorized"})
+	token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+	if token == "" {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
+		return
 	}
-	
+
+	userID, err := utils.VerifyToken(token)
+
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not Authorized"})
+		return
+	}
+
 	var event models.Event
 	// this will only accept the json data defined in the event struct
 	// but it is not strictly required and can be ignored
@@ -70,7 +77,7 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	event.UserID = 1
+	event.UserID = int(userID)
 
 	err = event.Save()
 
