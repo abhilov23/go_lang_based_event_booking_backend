@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/abhilov23/gin_project/models"
+	"github.com/abhilov23/gin_project/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -46,10 +47,23 @@ func getEvent(context *gin.Context) {
 }
 
 func createEvent(context *gin.Context) {
+	token := context.Request.Header.Get("Authorization")
+	
+	if token=="" {
+		context.JSON(http.StatusUnauthorized,gin.H{"message":"unauthorized"})
+		return
+	}
+
+	err := utils.VerifyToken(token)
+    
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message":"Not Authorized"})
+	}
+	
 	var event models.Event
 	// this will only accept the json data defined in the event struct
 	// but it is not strictly required and can be ignored
-	err := context.ShouldBindJSON(&event)
+	err = context.ShouldBindJSON(&event)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "could not parse request data"})
